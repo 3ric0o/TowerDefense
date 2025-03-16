@@ -9,7 +9,6 @@ Goblin::Goblin(float x, float y)
 
 void Goblin::LoadAnimations()
 {
-    
     AddAnimation(AnimationState::WALK_DOWN, "resources/enemies/goblin_walk_down.png", 6, 10);
     AddAnimation(AnimationState::WALK_UP, "resources/enemies/goblin_walk_up.png", 6, 10);
     AddAnimation(AnimationState::WALK_LEFT, "resources/enemies/goblin_walk_left.png", 6, 10);

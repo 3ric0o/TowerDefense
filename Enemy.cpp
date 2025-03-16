@@ -7,7 +7,7 @@
 
 Enemy::Enemy(float x, float y, float speed, int health, int damage)
     : position{x, y}, targetPosition{x, y}, speed(speed), health(health), 
-      maxHealth(health), damage(damage), alive(true), currentState(AnimationState::IDLE),
+      maxHealth(health), damage(damage), alive(true),
       currentFrame(0), framesCounter(0), scale(2.0f), direction{0, 1}
 {}
 
@@ -184,7 +184,8 @@ void Enemy::AddAnimation(
 {
     Texture2D texture = LoadTexture(texturePath);
     
-    if (texture.id > 0) {
+    if (texture.id > 0)
+    {
         Animation anim;
         anim.texture = texture;
         anim.frameCount = frameCount;
@@ -193,7 +194,9 @@ void Enemy::AddAnimation(
         anim.framesSpeed = framesSpeed;
         
         animations[state] = anim;
-    } else {
+    }
+    else
+    {
         std::cout << "Failed to load texture: " << texturePath << std::endl;
     }
 }
@@ -207,11 +210,7 @@ void Enemy::MoveTowardsTarget(float deltaTime)
     // magnitude of direction vector
     float distance = sqrt(dx * dx + dy * dy);
     
-    if (distance < 1.0f)
-    {
-        SetAnimationState(AnimationState::IDLE);
-        return;
-    }
+    if (distance < 1.0f) { return; }
     
     // Normalize vector
     dx /= distance;
