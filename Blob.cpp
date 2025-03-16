@@ -9,10 +9,10 @@ Blob::Blob(float x, float y)
 
 void Blob::LoadAnimations()
 {
-    AddAnimation(AnimationState::WALK_DOWN, "resources/FIELD ENEMIES/1/D_Walk", 6, 10);
-    AddAnimation(AnimationState::WALK_UP, "resources/FIELD ENEMIES/1/D_Walk", 6, 10);
-    AddAnimation(AnimationState::WALK_LEFT, "resources/FIELD ENEMIES/1/S_Walk", 6, 10);
-    AddAnimation(AnimationState::WALK_RIGHT, "resources/FIELD ENEMIES/1/S_Walk", 6, 10);
+    AddAnimation(AnimationState::WALK_DOWN, "resources/FIELD ENEMIES/1/D_Walk.png", 6, 10);
+    AddAnimation(AnimationState::WALK_UP, "resources/FIELD ENEMIES/1/D_Walk.png", 6, 10);
+    AddAnimation(AnimationState::WALK_LEFT, "resources/FIELD ENEMIES/1/S_Walk.png", 6, 10);
+    AddAnimation(AnimationState::WALK_RIGHT, "resources/FIELD ENEMIES/1/S_Walk.png", 6, 10);
     AddAnimation(AnimationState::DEATH, "resources/FIELD ENEMIES/1/D_Death.png", 6, 10);
 }
 
