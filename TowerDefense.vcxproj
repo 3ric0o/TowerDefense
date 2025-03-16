@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClCompile Include="Blob.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="EnemySpawner.cpp" />
     <ClCompile Include="Goblin.cpp" />
     <ClCompile Include="Rat.cpp" />
     <ClCompile Include="TileMap.cpp" />
@@ -171,6 +172,7 @@
   <ItemGroup>
     <ClInclude Include="Blob.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EnemySpawner.h" />
     <ClInclude Include="Goblin.h" />
     <ClInclude Include="Rat.h" />
     <ClInclude Include="TileMap.h" />

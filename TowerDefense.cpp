@@ -1,7 +1,8 @@
 #include "raylib.h"
 #include "TileMap.h"
 #include "Enemy.h"
-#include "Blob.h"
+#include "EnemySpawner.h"
+
 
 
 
@@ -26,25 +27,21 @@ int main()
     
     Color highlightColor = Color(RED);
 
-
-    // Create a blob enemy for testing
-    // Convert tile coordinates to pixel coordinates (3,1)
-    float spawnX = 3 * 32 * 2.0f + 32; // Adding 32 to center in the tile
-    float spawnY = 1 * 32 * 2.0f + 32;
+    EnemySpawner spawner(32.0f, 2.0f);
+    spawner.AddSpawnPoint(3, 1);
+    spawner.AddSpawnPoint(4, 1);
+    spawner.AddSpawnPoint(0, 9);
+    spawner.AddSpawnPoint(0, 1);
+    spawner.AddSpawnPoint(10, 19);
+    spawner.AddSpawnPoint(11, 19);
     
-    Blob testBlob(spawnX, spawnY);
+    spawner.SetSpawnInterval(3.0f, 7.0f);
     
-    // Set target position to walk downward to row 15
-    float targetX = spawnX; // Same X coordinate (straight down)
-    float targetY = 15 * 32 * 2.0f + 32;
-    testBlob.SetTargetPosition(targetX, targetY);
-    
+    // Vector to store active enemies
+    std::vector<std::unique_ptr<Enemy>> enemies;
     
     while (!WindowShouldClose())  
     {
-        float deltaTime = GetFrameTime();
-        testBlob.Update(deltaTime);
-        
         BeginDrawing();
         ClearBackground(BLACK);
 
@@ -53,8 +50,6 @@ int main()
         treesMap.DrawObjects(0, 0, treeTexture, 66, 77);
         housesMap.DrawObjects(96, 0, houseTexture, 154, 149);
         ground.HighlightTileUnderMouse(0, 0, highlightColor);
-
-        testBlob.Draw();
         
         EndDrawing();
     }
