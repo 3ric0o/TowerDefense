@@ -66,6 +66,8 @@ std::unique_ptr<Enemy> EnemySpawner::CreateRandomEnemy(float x, float y) const
 {
     // Randomly choose an enemy type
     int enemyType = rand() % 3;
+
+    std::unique_ptr<Enemy> enemy;
     
     switch(enemyType)
     {
@@ -76,4 +78,5 @@ std::unique_ptr<Enemy> EnemySpawner::CreateRandomEnemy(float x, float y) const
     case 2:
         return std::make_unique<Rat>(x, y);
     }
+    return enemy;
 }

@@ -22,8 +22,8 @@ int main()
     TileMap treesMap("resources/Layers/3.csv", "", 30, 20, 32);  
     TileMap housesMap("resources/Layers/4.csv", "", 30, 20, 32); 
     
-    Texture2D treeTexture = LoadTexture("resources/FIELDS TILESET/2 Objects/7 Decor/Tree1.png"); // 66x77
-    Texture2D houseTexture = LoadTexture("resources/VILLAGE TILESET/2 Objects/7 House/4.png"); // 154x149
+    Texture2D treeTexture = LoadTexture("resources/FIELDS TILESET/2 Objects/7 Decor/Tree1.png");
+    Texture2D houseTexture = LoadTexture("resources/VILLAGE TILESET/2 Objects/7 House/4.png"); 
     
     Color highlightColor = Color(RED);
 
@@ -42,6 +42,22 @@ int main()
     
     while (!WindowShouldClose())  
     {
+        float deltaTime = GetFrameTime();
+        spawner.Update(deltaTime, enemies);
+
+        // Update all enemies
+        for (auto it = enemies.begin(); it != enemies.end();)
+        {
+            auto& enemy = *it;
+            
+            enemy->Update(deltaTime);
+            
+            if (!enemy->IsAlive() && enemy->IsDeathAnimationFinished())
+            {
+                it = enemies.erase(it);
+            }
+            else { ++it; }
+        }
         BeginDrawing();
         ClearBackground(BLACK);
 

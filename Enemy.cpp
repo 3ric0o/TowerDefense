@@ -4,16 +4,18 @@
 #include "Rat.h"
 #include <cmath>
 #include <iostream>
+#include <ranges>
 
 Enemy::Enemy(float x, float y, float speed, int health, int damage)
     : position{x, y}, targetPosition{x, y}, speed(speed), health(health), 
       maxHealth(health), damage(damage), alive(true),
-      currentFrame(0), framesCounter(0), scale(2.0f), direction{0, 1}
+      deathAnimationFinished(false), currentFrame(0), framesCounter(0), scale(2.0f),direction{0, 1}
 {}
 
 Enemy::~Enemy()
 {
-    for (auto& [state, anim] : animations) {
+    for (auto& anim : animations | std::views::values)
+    {
         UnloadTexture(anim.texture);
     }
 }
@@ -22,7 +24,8 @@ void Enemy::Update(float deltaTime)
 {
     if (!alive)
     {
-        if (currentState != AnimationState::DEATH) {
+        if (currentState != AnimationState::DEATH)
+        {
             SetAnimationState(AnimationState::DEATH);
         }
         UpdateAnimation(deltaTime);
@@ -40,11 +43,12 @@ void Enemy::Draw() const
         {
         const Animation& anim = it->second;
         
+        bool shouldFlip = (currentState == AnimationState::WALK_LEFT);
+        
         Rectangle source =
-            { 
-            static_cast<float>(currentFrame * anim.frameWidth),
+            { static_cast<float>(currentFrame * anim.frameWidth),
             0,
-            static_cast<float>(anim.frameWidth),
+            static_cast<float>(shouldFlip ? -anim.frameWidth : anim.frameWidth),
             static_cast<float>(anim.frameHeight)
         };
         
@@ -96,6 +100,8 @@ void Enemy::TakeDamage(int amount)
 }
 
 bool Enemy::IsAlive() const { return alive; }
+
+bool Enemy::IsDeathAnimationFinished() const { return !alive && deathAnimationFinished; }
 
 void Enemy::SetTargetPosition(float x, float y)
 {
@@ -151,7 +157,8 @@ void Enemy::UpdateAnimation(float deltaTime)
             {
                 if (currentState == AnimationState::DEATH)
                 {
-                    currentFrame = anim.frameCount - 1; 
+                    currentFrame = anim.frameCount - 1;
+                    deathAnimationFinished = true; // Mark death animation as finished
                 }
                 else
                 {
@@ -197,7 +204,7 @@ void Enemy::AddAnimation(
     }
     else
     {
-        std::cout << "Failed to load texture: " << texturePath << std::endl;
+        std::cout << "Failed to load texture: " << texturePath << '\n';
     }
 }
 
@@ -265,12 +272,10 @@ void Enemy::UpdateDirection()
     }
     else
     {
-        
-        SetAnimationState(AnimationState::IDLE);
+        SetAnimationState(AnimationState::NONE);
     }
 }
 
-// Factory function implementation
 std::unique_ptr<Enemy> CreateEnemy(const std::string& type, float x, float y)
 {
     if (type == "Blob")

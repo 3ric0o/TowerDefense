@@ -5,12 +5,10 @@
 #include <unordered_map>
 
 enum class AnimationState {
-    IDLE,
     WALK_DOWN,
     WALK_UP,
     WALK_LEFT,
     WALK_RIGHT,
-    ATTACK,
     DEATH,
     NONE
 };
@@ -32,6 +30,7 @@ public:
     virtual void Draw() const;
     virtual void TakeDamage(int amount);
     virtual bool IsAlive() const;
+    virtual bool IsDeathAnimationFinished() const;
     virtual std::string GetType() const = 0;
     
     void SetTargetPosition(float x, float y);
@@ -52,6 +51,7 @@ protected:
     int maxHealth;
     int damage;
     bool alive;
+    bool deathAnimationFinished;
     
     std::unordered_map<AnimationState, Animation> animations;
     AnimationState currentState;

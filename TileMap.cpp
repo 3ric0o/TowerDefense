@@ -101,18 +101,17 @@ bool TileMap::HighlightTileUnderMouse(int x_offset, int y_offset, Color highligh
 {
     Vector2 mousePos = GetMousePosition();
     
-    // Convert mouse position to grid coordinates
+    // mouse position to grid coordinates
     int tileX = (mousePos.x - x_offset) / (tileSize * scale);
     int tileY = (mousePos.y - y_offset) / (tileSize * scale);
     
-    // Check if the coordinates are within bounds
+    // Check if within bounds
     if (tileX >= 0 && tileX < width && tileY >= 0 && tileY < height) 
     {
         // Get the screen position of the tile
         int screenX = tileX * tileSize * scale + x_offset;
         int screenY = tileY * tileSize * scale + y_offset;
         
-        // Draw highlight rectangle
         DrawRectangle(
             screenX, 
             screenY, 
@@ -120,11 +119,9 @@ bool TileMap::HighlightTileUnderMouse(int x_offset, int y_offset, Color highligh
             tileSize * scale, 
             highlightColor
         );
-        
-        // Display tile information (optional)
+        //Debug - DELETE LATER!
         Tile* tile = &layers[tileY * width + tileX];
-        std::string tileInfo = "Tile: " + std::to_string(tileX) + "," + std::to_string(tileY) + 
-                              " ID: " + std::to_string(tile->id);
+        std::string tileInfo = "Tile: " + std::to_string(tileX) + "," + std::to_string(tileY) + " ID: " + std::to_string(tile->id);
         
         DrawText(tileInfo.c_str(), 10, 10, 20, WHITE);
         
