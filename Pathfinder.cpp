@@ -17,9 +17,9 @@ void Pathfinder::SetTargetLocation(int x, int y)
 
 Vector2 Pathfinder::GetTargetLocation() const { return targetLocation; }
 
-int Pathfinder::CalculateHCost(int x1, int y1, int x2, int y2)
+float Pathfinder::CalculateHCost(int x1, int y1, int x2, int y2)
 {
-    return abs(x1 - x2) + abs(y1 - y2);
+    return static_cast<float>(abs(x1 - x2) + abs(y1 - y2));
 }
 
 std::vector<PathNode> Pathfinder::GetNeighbors(const PathNode& node) const
@@ -34,7 +34,7 @@ std::vector<PathNode> Pathfinder::GetNeighbors(const PathNode& node) const
         if (walkMap.IsWalkable(newX, newY))
         {
             float movementCost = GetTileMovementCost(newX, newY);
-            neighbors.push_back({newX, newY, 0, 0, movementCost});
+            neighbors.push_back({newX, newY, 0.0f, 0.0f, movementCost});
         }
     }
     return neighbors;
@@ -50,7 +50,13 @@ std::vector<Vector2> Pathfinder::FindPath(int startX, int startY, int endX, int 
     std::unordered_map<int, std::pair<int, int>> cameFrom;
     int width = walkMap.GetWidth();
 
-    PathNode startNode = {startX, startY, 0, CalculateHCost(startX, startY, endX, endY)};
+    PathNode startNode = {
+        .x = startX,
+        .y = startY,
+        .gCost = 0.0f,
+        .hCost = CalculateHCost(startX, startY, endX, endY),
+        .movementCost = 1.0f
+    };
     openSet.push(startNode);
     openMap[startX + startY * width] = startNode;
 
@@ -71,7 +77,7 @@ std::vector<Vector2> Pathfinder::FindPath(int startX, int startY, int endX, int 
             int neighborKey = neighbor.x + neighbor.y * width;
             if (closedSet.find(neighborKey) != closedSet.end()) continue;
             
-            float tentativeGCost = current.gCost + neighbor.movementCost;
+            float tentativeGCost = current.gCost + (1.0f * neighbor.movementCost);
             if (openMap.find(neighborKey) == openMap.end() || tentativeGCost < openMap[neighborKey].gCost)
             {
                 PathNode updatedNeighbor = neighbor;
@@ -113,7 +119,7 @@ float Pathfinder::GetTileMovementCost(int x, int y) const
     Tile* tile = tileMap.GetTileAt(x, y);
     if (tile->id == 37)
     {  
-        return tile->movementCost;
+        return 1.0f * tile->movementCost;
     }
     return 1.0f;  
 }

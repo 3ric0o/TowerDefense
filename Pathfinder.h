@@ -9,22 +9,13 @@
 
 struct PathNode {
     int x, y;
-    int gCost; // Cost from start
-    int hCost; // Heuristic cost to end
+    float gCost; // Cost from start
+    float hCost; // Heuristic cost to end
     float movementCost = 1;
     
     // Get total cost (f = g + h)
     float GetFCost() const { return gCost + hCost; }
     bool operator==(const PathNode& other) const { return x == other.x && y == other.y; }
-};
-
-// Hash function for PathNode
-struct PathNodeHash
-{
-    std::size_t operator()(const PathNode& node) const
-    {
-        return std::hash<int>()(node.x) ^ (std::hash<int>()(node.y) << 1);
-    }
 };
 
 // Compare function for priority queue
@@ -62,7 +53,7 @@ private:
     float GetTileMovementCost(int x, int y) const;
     
     // Manhattan distance heuristic
-    static int CalculateHCost(int x1, int y1, int x2, int y2);
+    static float CalculateHCost(int x1, int y1, int x2, int y2);
     std::vector<PathNode> GetNeighbors(const PathNode& node) const;
     
     // Reconstruct the path from the came-from map

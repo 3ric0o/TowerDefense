@@ -36,7 +36,7 @@ void TileMap::Draw(int x_offset, int y_offset)
             
             // Skip drawing for tiles with ID -1
             if (tile->id == -1) continue;
-            if (tile->id == 37) { tile->movementCost = 1.9f; }
+            if (tile->id == 37) { tile->movementCost = 1.2f; }
             
             // Apply scaling to screen coordinates
             int screenX = x * tileSize * scale + x_offset;
