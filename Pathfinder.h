@@ -1,0 +1,69 @@
+#pragma once
+#include "WalkabilityMap.h"
+#include "raylib.h"
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <functional>
+
+struct PathNode {
+    int x, y;
+    int gCost; // Cost from start
+    int hCost; // Heuristic cost to end
+    int movementCost = 1;
+    
+    // Get total cost (f = g + h)
+    int GetFCost() const { return gCost + hCost; }
+    bool operator==(const PathNode& other) const { return x == other.x && y == other.y; }
+};
+
+// Hash function for PathNode
+struct PathNodeHash
+{
+    std::size_t operator()(const PathNode& node) const
+    {
+        return std::hash<int>()(node.x) ^ (std::hash<int>()(node.y) << 1);
+    }
+};
+
+// Compare function for priority queue
+struct ComparePathNode
+{
+    bool operator()(const PathNode& a, const PathNode& b)
+    {
+        // First compare by fCost
+        if (a.GetFCost() != b.GetFCost())
+        {
+            return a.GetFCost() > b.GetFCost();
+        }
+        // If fCost is the same, prioritize lower hCost
+        return a.hCost > b.hCost;
+    }
+};
+
+class Pathfinder
+{
+public:
+    Pathfinder(const WalkabilityMap& walkMap);
+    
+    // Find a path from start to end
+    std::vector<Vector2> FindPath(int startX, int startY, int endX, int endY);
+    void SetTargetLocation(int x, int y);
+    Vector2 GetTargetLocation() const;
+    
+    // Debug 
+    void DebugDrawPath(const std::vector<Vector2>& path, int tileSize, float scale, Color pathColor) const;
+
+private:
+    const WalkabilityMap& walkMap;
+    Vector2 targetLocation;
+    
+    // Manhattan distance heuristic
+    static int CalculateHCost(int x1, int y1, int x2, int y2);
+    std::vector<PathNode> GetNeighbors(const PathNode& node) const;
+    
+    // Reconstruct the path from the came-from map
+    std::vector<Vector2> ReconstructPath(
+        std::unordered_map<int, std::pair<int, int>>& cameFrom, 
+        int startX, int startY, int endX, int endY) const;
+};

@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include "Enemy.h"
+#include "WalkabilityMap.h"
 
 struct SpawnPoint
 {
@@ -14,12 +15,13 @@ struct SpawnPoint
 class EnemySpawner
 {
 public:
-    EnemySpawner(float tileSize = 32.0f, float scale = 2.0f);
+    EnemySpawner(WalkabilityMap& walkabilityMap, float tileSize = 32.0f, float scale = 2.0f);
     void AddSpawnPoint(int tileX, int tileY);
     void SetSpawnInterval(float minTime, float maxTime);
     void Update(float deltaTime, std::vector<std::unique_ptr<Enemy>>& enemies);
     
 private:
+    WalkabilityMap& walkabilityMap;
     std::vector<SpawnPoint> spawnPoints;
     float tileSize;
     float scale;

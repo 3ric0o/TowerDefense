@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 enum class AnimationState {
     WALK_DOWN,
@@ -42,6 +43,10 @@ public:
     float GetSpeed() const;
     int GetHealth() const;
     int GetDamage() const;
+
+    void SetPath(const std::vector<Vector2>& newPath);
+    void ClearPath();
+    bool HasPath() const;
     
 protected:
     Vector2 position;
@@ -60,6 +65,10 @@ protected:
     float scale;
     
     Vector2 direction;
+
+    std::vector<Vector2> path;
+    int currentPathIndex;
+    const float pathNodeRadius = 10.0f; // How close enemy needs to get to a path node
     
     void UpdateAnimation(float deltaTime);
     void SetAnimationState(AnimationState newState);
@@ -73,6 +82,7 @@ protected:
     );
     
     virtual void MoveTowardsTarget(float deltaTime);
+    virtual void FollowPath(float deltaTime);
     virtual void UpdateDirection();
 };
 

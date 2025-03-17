@@ -101,7 +101,19 @@ void Enemy::TakeDamage(int amount)
 
 bool Enemy::IsAlive() const { return alive; }
 
-bool Enemy::IsDeathAnimationFinished() const { return !alive && deathAnimationFinished; }
+bool Enemy::IsDeathAnimationFinished() const
+{
+    if (!alive)
+    {
+        // If the current state is DEATH and we've reached the last frame
+        if (currentState == AnimationState::DEATH)
+        {
+            Animation deathAnimation = animations.at(AnimationState::DEATH);
+            return currentFrame >= deathAnimation.frameCount - 1;
+        }
+    }
+    return false;
+}
 
 void Enemy::SetTargetPosition(float x, float y)
 {
@@ -208,71 +220,65 @@ void Enemy::AddAnimation(
     }
 }
 
-void Enemy::MoveTowardsTarget(float deltaTime)
-{
-    // direction vector
-    float dx = targetPosition.x - position.x;
-    float dy = targetPosition.y - position.y;
-    
-    // magnitude of direction vector
-    float distance = sqrt(dx * dx + dy * dy);
-    
-    if (distance < 1.0f) { return; }
-    
-    // Normalize vector
-    dx /= distance;
-    dy /= distance;
-    
-    // Update direction for animation state
-    direction.x = dx;
-    direction.y = dy;
-    
-    // Move towards target
-    position.x += dx * speed * deltaTime;
-    position.y += dy * speed * deltaTime;
+void Enemy::MoveTowardsTarget(float deltaTime) {
+    if (path.empty()) {
+        // If no path, use the original implementation
+        Vector2 direction = {
+            targetPosition.x - position.x,
+            targetPosition.y - position.y
+        };
+        
+        // Normalize direction
+        float length = sqrtf(direction.x * direction.x + direction.y * direction.y);
+        if (length > 0) {
+            direction.x /= length;
+            direction.y /= length;
+            
+            // Move towards target
+            position.x += direction.x * speed * deltaTime;
+            position.y += direction.y * speed * deltaTime;
+            
+            // Update animation state based on movement direction
+            UpdateDirection();
+        }
+    } else {
+        // Follow the path
+        FollowPath(deltaTime);
+    }
 }
 
 void Enemy::UpdateDirection()
 {
-    // Calculate normalized direction to target
-    float dx = targetPosition.x - position.x;
-    float dy = targetPosition.y - position.y;
-    
-    float distance = sqrt(dx * dx + dy * dy);
-    if (distance > 1.0f) {
-        // Normalize
-        dx /= distance;
-        dy /= distance;
-        
-        direction.x = dx;
-        direction.y = dy;
-        
-        if (fabs(dx) > fabs(dy))
+    if (fabs(direction.x) < 0.01f && fabs(direction.y) < 0.01f)
         {
-            if (dx > 0)
-            {
-                SetAnimationState(AnimationState::WALK_RIGHT);
-            }
-            else
-            {
-                SetAnimationState(AnimationState::WALK_LEFT);
-            }
+        SetAnimationState(AnimationState::NONE);
+        return;
+    }
+
+    // Determine animation based on dominant direction component
+    if (fabs(direction.x) > fabs(direction.y))
+    {
+        // Horizontal movement is dominant
+        if (direction.x > 0)
+        {
+            SetAnimationState(AnimationState::WALK_RIGHT);
         }
         else
         {
-            if (dy > 0)
-            {
-                SetAnimationState(AnimationState::WALK_DOWN);
-            }
-            else
-            {
-                SetAnimationState(AnimationState::WALK_UP);
-            }
+            SetAnimationState(AnimationState::WALK_LEFT);
         }
     }
     else
     {
-        SetAnimationState(AnimationState::NONE);
+        // Vertical movement is dominant
+        if (direction.y > 0)
+        {
+            SetAnimationState(AnimationState::WALK_DOWN);
+        }
+        else
+        {
+            SetAnimationState(AnimationState::WALK_UP);
+        }
     }
 }
 
@@ -291,4 +297,80 @@ std::unique_ptr<Enemy> CreateEnemy(const std::string& type, float x, float y)
         return std::make_unique<Rat>(x, y);
     }
     return nullptr;
+}
+
+void Enemy::SetPath(const std::vector<Vector2>& newPath)
+{
+    path = newPath;
+    currentPathIndex = 0;
+    
+    // If we have a path, set the first node as our target
+    if (!path.empty())
+    {
+        targetPosition.x = path[0].x * 32 * 2.0f + (32 * 2.0f / 2); // Center of tile
+        targetPosition.y = path[0].y * 32 * 2.0f + (32 * 2.0f / 2); // Center of tile
+    }
+}
+
+void Enemy::ClearPath()
+{
+    path.clear();
+    currentPathIndex = 0;
+}
+
+bool Enemy::HasPath() const { return !path.empty(); }
+
+void Enemy::FollowPath(float deltaTime)
+{
+    if (currentPathIndex >= path.size()) { return; }
+
+    // path node to world coordinates 
+    float nodeX = path[currentPathIndex].x * 32 * 2.0f + (32 * 2.0f / 2);
+    float nodeY = path[currentPathIndex].y * 32 * 2.0f + (32 * 2.0f / 2);
+
+    // Direction to current path node
+    Vector2 moveDir =
+        {
+        nodeX - position.x,
+        nodeY - position.y
+    };
+
+    // Distance to current path node
+    float distance = sqrtf(moveDir.x * moveDir.x + moveDir.y * moveDir.y);
+
+    // If close enough to the current node, target the next one
+    if (distance < pathNodeRadius)
+    {
+        currentPathIndex++;
+
+        if (currentPathIndex < path.size())
+        {
+            // Update target to the next node
+            nodeX = path[currentPathIndex].x * 32 * 2.0f + (32 * 2.0f / 2);
+            nodeY = path[currentPathIndex].y * 32 * 2.0f + (32 * 2.0f / 2);
+
+            // Update direction
+            moveDir.x = nodeX - position.x;
+            moveDir.y = nodeY - position.y;
+            distance = sqrtf(moveDir.x * moveDir.x + moveDir.y * moveDir.y);
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    // Normalize direction
+    if (distance > 0)
+    {
+        moveDir.x /= distance;
+        moveDir.y /= distance;
+        
+        direction = moveDir;
+        UpdateDirection();
+
+        // Move towards target
+        position.x += moveDir.x * speed * deltaTime;
+        position.y += moveDir.y * speed * deltaTime;
+    }
 }

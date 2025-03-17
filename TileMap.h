@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include "WalkabilityMap.h"
 
 
 struct Tile;
@@ -22,7 +23,7 @@ public:
   int GetHeight() const { return height; }
   int GetTileSize() const { return tileSize; }
   float GetScale() const { return scale; }
-
+  void UpdateWalkabilityMap(WalkabilityMap& walkMap, bool makeUnwalkable = true);
 private:
   Tile* layers;
   Texture2D tileset;
@@ -35,4 +36,5 @@ private:
 struct Tile {
   int id;
   int movementCost;
+  bool isWalkable;
 };

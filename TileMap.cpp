@@ -36,6 +36,7 @@ void TileMap::Draw(int x_offset, int y_offset)
             
             // Skip drawing for tiles with ID -1
             if (tile->id == -1) continue;
+            if (tile->id == 37) { tile->movementCost = 10; }
             
             // Apply scaling to screen coordinates
             int screenX = x * tileSize * scale + x_offset;
@@ -151,4 +152,22 @@ bool TileMap::GetTileCoordinates(int screenX, int screenY, int x_offset, int y_o
     }
     
     return false;
+}
+
+void TileMap::UpdateWalkabilityMap(WalkabilityMap& walkMap, bool makeUnwalkable)
+{
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            Tile* tile = GetTileAt(x, y);
+            
+            // If this tile has content (id != -1), mark it in the walkability map
+            if (tile && tile->id != -1)
+            {
+                if (makeUnwalkable)
+                {
+                    walkMap.SetUnwalkable(x, y);
+                }
+            }
+        }
+    }
 }

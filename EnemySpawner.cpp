@@ -5,14 +5,14 @@
 #include <cstdlib>
 #include <ctime>
 
-EnemySpawner::EnemySpawner(float tileSize, float scale)
-    : tileSize(tileSize), scale(scale),
+EnemySpawner::EnemySpawner(WalkabilityMap& walkabilityMap, float tileSize, float scale)
+    : walkabilityMap(walkabilityMap), tileSize(tileSize), scale(scale),
       minSpawnTime(2.0f), maxSpawnTime(5.0f),
       spawnTimer(0.0f)
 {
     // Initialize random seed
     srand(static_cast<unsigned int>(time(nullptr)));
-    
+
     // Set first spawn time
     timeToNextSpawn = minSpawnTime + static_cast<float>(rand()) / (RAND_MAX / (maxSpawnTime - minSpawnTime));
 }
@@ -20,6 +20,7 @@ EnemySpawner::EnemySpawner(float tileSize, float scale)
 void EnemySpawner::AddSpawnPoint(int tileX, int tileY)
 {
     spawnPoints.emplace_back(tileX, tileY);
+    walkabilityMap.ForceWalkable(tileX, tileY);
 }
 
 void EnemySpawner::SetSpawnInterval(float minTime, float maxTime)
