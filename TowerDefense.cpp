@@ -54,7 +54,7 @@ int main()
     
     spawner.SetSpawnInterval(3.0f, 7.0f);
 
-    Pathfinder pathfinder(walkMap);
+    Pathfinder pathfinder(walkMap, ground);
     pathfinder.SetTargetLocation(26, 11);
     
     // Vector to store active enemies
@@ -77,21 +77,39 @@ int main()
                 std::vector<Vector2> path = pathfinder.FindPath(tileX, tileY, targetPos.x, targetPos.y);
                 enemy->SetPath(path);
             }
+            // if enemy position == tile position with id == 37 enemy speed reduced by 10%
         }
 
         // Update all enemies
         for (auto it = enemies.begin(); it != enemies.end();)
         {
             auto& enemy = *it;
-            
+    
+            // Get enemy position in tile coordinates
+            int tileX = static_cast<int>(enemy->GetPosition().x / (32 * 2.0f));
+            int tileY = static_cast<int>(enemy->GetPosition().y / (32 * 2.0f));
+    
+            // Check if enemy is on a slow tile (ID 37)
+            Tile* currentTile = ground.GetTileAt(tileX, tileY);
+    
+            if (currentTile && currentTile->id == 37)
+            {
+                enemy->SetSpeedMultiplier(0.6f);
+            }
+            else
+            {
+                // Reset to normal speed
+                enemy->ResetSpeed();
+            }
+    
             enemy->Update(deltaTime);
-            
+    
             if (!enemy->IsAlive() && enemy->IsDeathAnimationFinished())
             {
                 it = enemies.erase(it);
             }
             else
-            { 
+            {
                 ++it;
             }
         }

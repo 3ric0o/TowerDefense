@@ -5,15 +5,16 @@
 #include <queue>
 #include <unordered_map>
 #include <functional>
+#include "TileMap.h"
 
 struct PathNode {
     int x, y;
     int gCost; // Cost from start
     int hCost; // Heuristic cost to end
-    int movementCost = 1;
+    float movementCost = 1;
     
     // Get total cost (f = g + h)
-    int GetFCost() const { return gCost + hCost; }
+    float GetFCost() const { return gCost + hCost; }
     bool operator==(const PathNode& other) const { return x == other.x && y == other.y; }
 };
 
@@ -32,7 +33,7 @@ struct ComparePathNode
     bool operator()(const PathNode& a, const PathNode& b)
     {
         // First compare by fCost
-        if (a.GetFCost() != b.GetFCost())
+        if (std::abs(a.GetFCost() - b.GetFCost()) > 0.001f)
         {
             return a.GetFCost() > b.GetFCost();
         }
@@ -44,7 +45,7 @@ struct ComparePathNode
 class Pathfinder
 {
 public:
-    Pathfinder(const WalkabilityMap& walkMap);
+    Pathfinder(const WalkabilityMap& walkMap, const TileMap& tileMap);
     
     // Find a path from start to end
     std::vector<Vector2> FindPath(int startX, int startY, int endX, int endY);
@@ -56,7 +57,9 @@ public:
 
 private:
     const WalkabilityMap& walkMap;
+    const TileMap& tileMap;
     Vector2 targetLocation;
+    float GetTileMovementCost(int x, int y) const;
     
     // Manhattan distance heuristic
     static int CalculateHCost(int x1, int y1, int x2, int y2);

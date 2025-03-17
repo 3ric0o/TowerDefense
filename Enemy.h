@@ -43,6 +43,8 @@ public:
     float GetSpeed() const;
     int GetHealth() const;
     int GetDamage() const;
+    void SetSpeedMultiplier(float multiplier);
+    void ResetSpeed();
 
     void SetPath(const std::vector<Vector2>& newPath);
     void ClearPath();
@@ -52,6 +54,7 @@ protected:
     Vector2 position;
     Vector2 targetPosition;
     float speed;
+    float maxSpeed;
     int health;
     int maxHealth;
     int damage;
@@ -80,8 +83,6 @@ protected:
         int frameCount, 
         int framesSpeed = 8
     );
-    
-    virtual void MoveTowardsTarget(float deltaTime);
     virtual void FollowPath(float deltaTime);
     virtual void UpdateDirection();
 };

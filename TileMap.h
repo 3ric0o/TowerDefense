@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include "WalkabilityMap.h"
+#include "enemy.h"
 
 
 struct Tile;
@@ -16,7 +17,7 @@ public:
   
   bool HighlightTileUnderMouse(int x_offset, int y_offset, Color highlightColor);
   
-  Tile* GetTileAt(int x, int y);
+  Tile* GetTileAt(int x, int y) const;
   bool GetTileCoordinates(int screenX, int screenY, int x_offset, int y_offset, int* outTileX, int* outTileY);
   
   int GetWidth() const { return width; }
@@ -24,6 +25,7 @@ public:
   int GetTileSize() const { return tileSize; }
   float GetScale() const { return scale; }
   void UpdateWalkabilityMap(WalkabilityMap& walkMap, bool makeUnwalkable = true);
+  
 private:
   Tile* layers;
   Texture2D tileset;
@@ -35,6 +37,6 @@ private:
 
 struct Tile {
   int id;
-  int movementCost;
+  float movementCost = 1.0f;
   bool isWalkable;
 };

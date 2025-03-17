@@ -4,7 +4,11 @@
 #include <queue>
 #include <unordered_map>
 
-Pathfinder::Pathfinder(const WalkabilityMap& walkMap) : walkMap(walkMap), targetLocation({26, 11}) {}
+#include "TileMap.h"
+
+Pathfinder::Pathfinder(const WalkabilityMap& walkMap, const TileMap& tile_map) : walkMap(walkMap), tileMap(tile_map),
+    targetLocation({26, 11})
+{}
 
 void Pathfinder::SetTargetLocation(int x, int y)
 {
@@ -29,7 +33,8 @@ std::vector<PathNode> Pathfinder::GetNeighbors(const PathNode& node) const
         int newY = node.y + dy[i];
         if (walkMap.IsWalkable(newX, newY))
         {
-            neighbors.push_back({newX, newY, 0, 0});
+            float movementCost = GetTileMovementCost(newX, newY);
+            neighbors.push_back({newX, newY, 0, 0, movementCost});
         }
     }
     return neighbors;
@@ -65,13 +70,14 @@ std::vector<Vector2> Pathfinder::FindPath(int startX, int startY, int endX, int 
         {
             int neighborKey = neighbor.x + neighbor.y * width;
             if (closedSet.find(neighborKey) != closedSet.end()) continue;
-
-            int tentativeGCost = current.gCost + 1;
+            
+            float tentativeGCost = current.gCost + neighbor.movementCost;
             if (openMap.find(neighborKey) == openMap.end() || tentativeGCost < openMap[neighborKey].gCost)
             {
                 PathNode updatedNeighbor = neighbor;
                 updatedNeighbor.gCost = tentativeGCost;
                 updatedNeighbor.hCost = CalculateHCost(neighbor.x, neighbor.y, endX, endY);
+                updatedNeighbor.movementCost = neighbor.movementCost;
                 openMap[neighborKey] = updatedNeighbor;
                 openSet.push(updatedNeighbor);
                 cameFrom[neighborKey] = {current.x, current.y};
@@ -102,3 +108,12 @@ std::vector<Vector2> Pathfinder::ReconstructPath(
     return path;
 }
 
+float Pathfinder::GetTileMovementCost(int x, int y) const
+{
+    Tile* tile = tileMap.GetTileAt(x, y);
+    if (tile->id == 37)
+    {  
+        return tile->movementCost;
+    }
+    return 1.0f;  
+}

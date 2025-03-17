@@ -7,9 +7,9 @@
 #include <ranges>
 
 Enemy::Enemy(float x, float y, float speed, int health, int damage)
-    : position{x, y}, targetPosition{x, y}, speed(speed), health(health), 
+    : position{x, y}, targetPosition{x, y}, speed(speed), maxSpeed(speed), health(health), 
       maxHealth(health), damage(damage), alive(true),
-      deathAnimationFinished(false), currentFrame(0), framesCounter(0), scale(2.0f),direction{0, 1}
+      deathAnimationFinished(false), currentFrame(0), framesCounter(0), scale(2.0f), direction{0, 1}
 {}
 
 Enemy::~Enemy()
@@ -32,7 +32,7 @@ void Enemy::Update(float deltaTime)
         return;
     }
     UpdateDirection();
-    MoveTowardsTarget(deltaTime);
+    FollowPath(deltaTime);
     UpdateAnimation(deltaTime);
 }
 
@@ -152,6 +152,16 @@ int Enemy::GetDamage() const
     return damage;
 }
 
+void Enemy::SetSpeedMultiplier(float multiplier)
+{
+    speed = maxSpeed * multiplier;
+}
+
+void Enemy::ResetSpeed()
+{
+    speed = maxSpeed;
+}
+
 void Enemy::UpdateAnimation(float deltaTime)
 {
     auto it = animations.find(currentState);
@@ -217,33 +227,6 @@ void Enemy::AddAnimation(
     else
     {
         std::cout << "Failed to load texture: " << texturePath << '\n';
-    }
-}
-
-void Enemy::MoveTowardsTarget(float deltaTime) {
-    if (path.empty()) {
-        // If no path, use the original implementation
-        Vector2 direction = {
-            targetPosition.x - position.x,
-            targetPosition.y - position.y
-        };
-        
-        // Normalize direction
-        float length = sqrtf(direction.x * direction.x + direction.y * direction.y);
-        if (length > 0) {
-            direction.x /= length;
-            direction.y /= length;
-            
-            // Move towards target
-            position.x += direction.x * speed * deltaTime;
-            position.y += direction.y * speed * deltaTime;
-            
-            // Update animation state based on movement direction
-            UpdateDirection();
-        }
-    } else {
-        // Follow the path
-        FollowPath(deltaTime);
     }
 }
 

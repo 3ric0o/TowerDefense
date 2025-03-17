@@ -36,7 +36,7 @@ void TileMap::Draw(int x_offset, int y_offset)
             
             // Skip drawing for tiles with ID -1
             if (tile->id == -1) continue;
-            if (tile->id == 37) { tile->movementCost = 10; }
+            if (tile->id == 37) { tile->movementCost = 1.9f; }
             
             // Apply scaling to screen coordinates
             int screenX = x * tileSize * scale + x_offset;
@@ -132,9 +132,10 @@ bool TileMap::HighlightTileUnderMouse(int x_offset, int y_offset, Color highligh
     return false;
 }
 
-Tile* TileMap::GetTileAt(int x, int y)
+Tile* TileMap::GetTileAt(int x, int y) const
 {
-    if (x >= 0 && x < width && y >= 0 && y < height) {
+    if (x >= 0 && x < width && y >= 0 && y < height)
+    {
         return &layers[y * width + x];
     }
     return nullptr;
@@ -156,11 +157,12 @@ bool TileMap::GetTileCoordinates(int screenX, int screenY, int x_offset, int y_o
 
 void TileMap::UpdateWalkabilityMap(WalkabilityMap& walkMap, bool makeUnwalkable)
 {
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
             Tile* tile = GetTileAt(x, y);
             
-            // If this tile has content (id != -1), mark it in the walkability map
             if (tile && tile->id != -1)
             {
                 if (makeUnwalkable)
