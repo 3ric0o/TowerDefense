@@ -166,6 +166,7 @@
     <ClCompile Include="EnemySpawner.cpp" />
     <ClCompile Include="Goblin.cpp" />
     <ClCompile Include="Pathfinder.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Rat.cpp" />
     <ClCompile Include="TileMap.cpp" />
     <ClCompile Include="TowerDefense.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="EnemySpawner.h" />
     <ClInclude Include="Goblin.h" />
     <ClInclude Include="Pathfinder.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Rat.h" />
     <ClInclude Include="TileMap.h" />
     <ClInclude Include="WalkabilityMap.h" />

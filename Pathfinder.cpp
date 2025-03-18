@@ -25,10 +25,11 @@ float Pathfinder::CalculateHCost(int x1, int y1, int x2, int y2)
 std::vector<PathNode> Pathfinder::GetNeighbors(const PathNode& node) const
 {
     std::vector<PathNode> neighbors;
-    const int dx[] = {0, 1, 0, -1};
-    const int dy[] = {-1, 0, 1, 0};
+    constexpr int dx[] = {0, 1, 0, -1};
+    constexpr int dy[] = {-1, 0, 1, 0};
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; ++i)
+    {
         int newX = node.x + dx[i];
         int newY = node.y + dy[i];
         if (walkMap.IsWalkable(newX, newY))
@@ -40,7 +41,7 @@ std::vector<PathNode> Pathfinder::GetNeighbors(const PathNode& node) const
     return neighbors;
 }
 
-std::vector<Vector2> Pathfinder::FindPath(int startX, int startY, int endX, int endY)
+std::vector<Vector2> Pathfinder::FindPath(int startX, int startY, int endX, int endY) const
 {
     if (!walkMap.IsWalkable(startX, startY) || !walkMap.IsWalkable(endX, endY)) { return {}; }
 
@@ -75,10 +76,10 @@ std::vector<Vector2> Pathfinder::FindPath(int startX, int startY, int endX, int 
         for (const auto& neighbor : GetNeighbors(current))
         {
             int neighborKey = neighbor.x + neighbor.y * width;
-            if (closedSet.find(neighborKey) != closedSet.end()) continue;
+            if (closedSet.contains(neighborKey)) continue;
             
             float tentativeGCost = current.gCost + (1.0f * neighbor.movementCost);
-            if (openMap.find(neighborKey) == openMap.end() || tentativeGCost < openMap[neighborKey].gCost)
+            if (!openMap.contains(neighborKey) || tentativeGCost < openMap[neighborKey].gCost)
             {
                 PathNode updatedNeighbor = neighbor;
                 updatedNeighbor.gCost = tentativeGCost;
@@ -104,7 +105,7 @@ std::vector<Vector2> Pathfinder::ReconstructPath(
     {
         path.push_back({static_cast<float>(currentX), static_cast<float>(currentY)});
         int key = currentX + currentY * width;
-        if (cameFrom.find(key) == cameFrom.end()) return {};
+        if (!cameFrom.contains(key)) return {};
         auto prev = cameFrom[key];
         currentX = prev.first;
         currentY = prev.second;
@@ -114,12 +115,19 @@ std::vector<Vector2> Pathfinder::ReconstructPath(
     return path;
 }
 
+float randomFloat()
+{
+    return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+}
+
+float randomBinomial()
+{
+    return randomFloat() - randomFloat();
+}
+
 float Pathfinder::GetTileMovementCost(int x, int y) const
 {
     Tile* tile = tileMap.GetTileAt(x, y);
-    if (tile->id == 37)
-    {  
-        return 1.0f * tile->movementCost;
-    }
-    return 1.0f;  
+    float baseCost = tile ? tile->movementCost + randomBinomial() : 1.0f + randomBinomial();
+    return baseCost;
 }

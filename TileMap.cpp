@@ -1,4 +1,6 @@
 #include "TileMap.h"
+
+#include <cassert>
 #include <string>
 
 TileMap::TileMap(const char* mapPath, const char* tilesetPath, int width, int height, int tileSize) :
@@ -9,8 +11,7 @@ TileMap::TileMap(const char* mapPath, const char* tilesetPath, int width, int he
     
     FILE* file = nullptr;
     errno_t err = fopen_s(&file, mapPath, "r");
-    
-    if (err != 0 || file == nullptr) { return; }
+    assert(err == 0 && file != nullptr);
     
     int num_read { 0 };
     while (fscanf_s(file, "%d,", &layers[num_read].id) != EOF)
@@ -36,7 +37,7 @@ void TileMap::Draw(int x_offset, int y_offset)
             
             // Skip drawing for tiles with ID -1
             if (tile->id == -1) continue;
-            if (tile->id == 37) { tile->movementCost = 1.2f; }
+            if (tile->id == 37) { tile->movementCost = 1.5f; }
             
             // Apply scaling to screen coordinates
             int screenX = x * tileSize * scale + x_offset;
@@ -122,7 +123,7 @@ bool TileMap::HighlightTileUnderMouse(int x_offset, int y_offset, Color highligh
         );
         //Debug - DELETE LATER!
         Tile* tile = &layers[tileY * width + tileX];
-        std::string tileInfo = "Tile: " + std::to_string(tileX) + "," + std::to_string(tileY) + " ID: " + std::to_string(tile->id);
+        std::string tileInfo = "Tile: " + std::to_string(tileX) + "," + std::to_string(tileY) + " ID: " + std::to_string(tile->id) + " Movement Cost: " + std::to_string(tile->movementCost);
         
         DrawText(tileInfo.c_str(), 10, 10, 20, WHITE);
         

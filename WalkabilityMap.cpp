@@ -20,10 +20,14 @@ void WalkabilityMap::Reset()
 
 void WalkabilityMap::SetUnwalkable(int x, int y)
 {
+#ifdef _DEBUG
     if (x >= 0 && x < width && y >= 0 && y < height)
     {
+#endif
         walkable[y][x] = false;
+#ifdef _DEBUG
     }
+#endif
 }
 
 bool WalkabilityMap::IsWalkable(int x, int y) const

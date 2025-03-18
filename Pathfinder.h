@@ -39,7 +39,7 @@ public:
     Pathfinder(const WalkabilityMap& walkMap, const TileMap& tileMap);
     
     // Find a path from start to end
-    std::vector<Vector2> FindPath(int startX, int startY, int endX, int endY);
+    std::vector<Vector2> FindPath(int startX, int startY, int endX, int endY) const;
     void SetTargetLocation(int x, int y);
     Vector2 GetTargetLocation() const;
     

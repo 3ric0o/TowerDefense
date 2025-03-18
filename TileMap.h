@@ -35,8 +35,11 @@ private:
   float scale;
 };
 
+// std::map<int,TileData> tileSetData;
+// movementCosts[37] = 1.0f;
+
 struct Tile {
   int id;
-  float movementCost = 1.0f;
+  float movementCost;
   bool isWalkable;
 };
