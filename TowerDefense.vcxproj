@@ -169,6 +169,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Rat.cpp" />
     <ClCompile Include="TileMap.cpp" />
+    <ClCompile Include="Tower.cpp" />
     <ClCompile Include="TowerDefense.cpp" />
     <ClCompile Include="WalkabilityMap.cpp" />
   </ItemGroup>
@@ -181,6 +182,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Rat.h" />
     <ClInclude Include="TileMap.h" />
+    <ClInclude Include="Tower.h" />
     <ClInclude Include="WalkabilityMap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -180,7 +180,7 @@ void Enemy::UpdateAnimation(float deltaTime)
                 if (currentState == AnimationState::DEATH)
                 {
                     currentFrame = anim.frameCount - 1;
-                    deathAnimationFinished = true; // Mark death animation as finished
+                    deathAnimationFinished = true; 
                 }
                 else
                 {

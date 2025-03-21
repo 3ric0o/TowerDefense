@@ -5,6 +5,9 @@
 #include "WalkabilityMap.h"
 #include "Pathfinder.h"
 #include "Player.h"
+#include "Tower.h"
+
+static bool newWalkable = true;
 
 int main()
 {
@@ -17,6 +20,7 @@ int main()
 
     Player player(100);
     std::vector<std::unique_ptr<Enemy>> enemies;
+    std::vector<Tower> towers;
 
     auto ResetGame = [&]()
     {
@@ -98,20 +102,106 @@ int main()
 
         if (gameActive && player.IsAlive())
         {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                Vector2 mousePosition = GetMousePosition();
+                int tileX, tileY;
+                if (ground.GetTileCoordinates(mousePosition.x, mousePosition.y, 0, 0, &tileX, &tileY))
+                {
+                    if (Tower::CanPlaceAt(tileX, tileY, walkMap))
+                    {
+                        float worldX = tileX * ground.GetTileSize() * ground.GetScale() + (ground.GetTileSize() * ground.GetScale() * Tower::TOWER_WIDTH / 2.0f);
+                        float worldY = tileY * ground.GetTileSize() * ground.GetScale() + (ground.GetTileSize() * ground.GetScale() * Tower::TOWER_HEIGHT / 2.0f);
+
+                        towers.emplace_back(worldX, worldY);
+
+                        // Mark tiles as unwalkable
+                        for (int y = 0; y < Tower::TOWER_HEIGHT; y++)
+                        {
+                            for (int x = 0; x < Tower::TOWER_WIDTH; x++)
+                            {
+                                walkMap.SetUnwalkable(tileX + x, tileY + y);
+                            }
+                        }
+            
+                        // Force all enemies to recalculate their paths
+                        for (auto& enemy : enemies)
+                        {
+                            if (enemy->IsAlive())
+                            {
+                                enemy->ClearPath();
+                            }
+                        }
+                        newWalkable = true;
+                    }
+                }
+            }
+
+            // Draw tower placement preview
+            int tileX, tileY;
+            if (ground.GetTileCoordinates(GetMousePosition().x, GetMousePosition().y, 0, 0, &tileX, &tileY))
+            {
+                Tower::DrawPlacementPreview(tileX, tileY, walkMap);
+            }
+            
+            for (auto& tower : towers)
+            {
+                tower.Update(deltaTime);
+            }
+
+            for (auto& tower : towers)
+            {
+                tower.CheckEnemiesInRange(enemies);
+            }
+
+            for (auto& tower : towers)
+            {
+                const auto& projectiles = tower.GetProjectiles();
+                for (const auto& projectile : projectiles)
+                {
+                    if (!projectile.IsActive()) continue;
+
+                    Vector2 projectilePos = projectile.GetPosition();
+
+                    // Check collision with all enemies
+                    for (auto& enemy : enemies)
+                    {
+                        if (!enemy->IsAlive()) continue;
+
+                        Vector2 enemyPos = enemy->GetPosition();
+                        float dx = projectilePos.x - enemyPos.x;
+                        float dy = projectilePos.y - enemyPos.y;
+                        float distanceSq = dx * dx + dy * dy;
+
+                        // Use a smaller collision radius for more reliable hits
+                        if (distanceSq < 10.0f * 10.0f)
+                        {
+                            enemy->TakeDamage(projectile.GetDamage());
+                            const_cast<Projectile&>(projectile) = Projectile({0, 0}, {0, 0}, 0, 0);
+                            break;
+                        }
+                    }
+                }
+            }
             spawner.Update(deltaTime, enemies);
             
             for (auto& enemy : enemies)
             {
-                if (!enemy->HasPath() && enemy->IsAlive())
+                if ((enemy->IsAlive() && !enemy->HasPath()) || (enemy->IsAlive() && newWalkable))
                 {
                     // Get the enemy's position in grid coordinates
                     int tileX = static_cast<int>(enemy->GetPosition().x / (32 * 2.0f));
                     int tileY = static_cast<int>(enemy->GetPosition().y / (32 * 2.0f));
-                
+
                     Vector2 targetPos = pathfinder.GetTargetLocation();
                     std::vector<Vector2> path = pathfinder.FindPath(tileX, tileY, targetPos.x, targetPos.y);
                     enemy->SetPath(path);
                 }
+            }
+            
+            if (newWalkable)
+            {
+                newWalkable = false;
             }
 
             // Update all enemies
@@ -177,15 +267,17 @@ int main()
         //ground.HighlightTileUnderMouse(0, 0, highlightColor);
         //walkMap.DrawDebugOverlay(0, 0, ground.GetTileSize(), ground.GetScale());
 
+        int tileX, tileY;
+        if (ground.GetTileCoordinates(GetMousePosition().x, GetMousePosition().y, 0, 0, &tileX, &tileY))
+        {
+            Tower::DrawPlacementPreview(tileX, tileY, walkMap);
+        }
+        
+        for (const auto& tower : towers)
+        {
+            tower.Draw();
+        }
         for (auto& enemy : enemies) { enemy->Draw(); }
-        /*Vector2 target = pathfinder.GetTargetLocation();
-        DrawRectangle(
-            target.x * ground.GetTileSize() * ground.GetScale(),
-            target.y * ground.GetTileSize() * ground.GetScale(),
-            ground.GetTileSize() * ground.GetScale(),
-            ground.GetTileSize() * ground.GetScale(),
-            ColorAlpha(YELLOW, 0.5f)
-        );*/
         
         player.Draw();
         EndDrawing();
